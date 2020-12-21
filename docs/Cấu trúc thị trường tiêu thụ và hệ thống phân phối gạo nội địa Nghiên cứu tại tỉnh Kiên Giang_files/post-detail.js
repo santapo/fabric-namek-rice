@@ -1,0 +1,2 @@
+
+if(jQuery===undefined){jQuery=$={}}!function(c,b,a,d){c(b).on("load resize",function(){c("#post_content").find("iframe").each(function(){c(this).height(c(this).width()/1.77778)})});c(function(){c(".twentytwenty-container[data-orientation!='vertical']").twentytwenty({default_offset_pct:0.7});c(".twentytwenty-container[data-orientation='vertical']").twentytwenty({default_offset_pct:0.3,orientation:"vertical"})})}(jQuery,this,document);
