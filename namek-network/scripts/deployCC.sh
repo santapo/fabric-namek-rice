@@ -290,14 +290,14 @@ chaincodeInvokeInit() {
 chaincodeQuery() {
   ORG=$1
   setGlobals $ORG
-  infoln "Querying on peer0.org${ORG} on channel '$CHANNEL_NAME'..."
+  infoln "Querying on peer0.${ORG} on channel '$CHANNEL_NAME'..."
   local rc=1
   local COUNTER=1
   # continue to poll
   # we either get a successful response, or reach MAX RETRY
   while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ]; do
     sleep $DELAY
-    infoln "Attempting to Query peer0.org${ORG}, Retry after $DELAY seconds."
+    infoln "Attempting to Query peer0.${ORG}, Retry after $DELAY seconds."
     set -x
     peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["queryAllCars"]}' >&log.txt
     res=$?
