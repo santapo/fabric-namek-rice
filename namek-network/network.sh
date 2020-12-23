@@ -260,3 +260,223 @@ fucntion createChannel() {
     fatalln "Create channel failed"
   fi
 }
+
+
+function deployCC() {
+
+  scripts/deployCC.sh $CHANNEL_NAME $CC_NAME $CC_SRC_PATH $CC_SRC_LANGUAGE $CC_VERSION $CC_SEQUENCE $CC_INIT_FCN $CC_END_POLICY $CC_COLL_CONFIG $CLI_DELAY $MAX_RETRY $VERBOSE
+
+  if [ $? -ne 0 ]; then
+    fatalln "Deploying chaincode failed"
+  fi
+
+  exit 0
+}
+
+function networkDown() {
+  # stop org3 containers also in addition to org1 and org2, in case we were running sample to add org3
+  docker-compose -f $COMPOSE_FILE_BASE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_CA down --volumes --remove-orphans
+  docker-compose -f $COMPOSE_FILE_COUCH_ORG3 -f $COMPOSE_FILE_ORG3 down --volumes --remove-orphans
+  # Don't remove the generated artifacts -- note, the ledgers are always removed
+  if [ "$MODE" != "restart" ]; then
+    # Bring down the network, deleting the volumes
+    #Cleanup the chaincode containers
+    clearContainers
+    #Cleanup images
+    removeUnwantedImages
+    # remove orderer block and other channel configuration transactions and certs
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations'
+    ## remove fabric ca artifacts
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db'
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db'
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db'
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db'
+    # remove channel and script artifacts
+    docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf channel-artifacts log.txt *.tar.gz'
+
+  fi
+}
+
+# Obtain the OS and Architecture string that will be used to select the correct
+# native binaries for your platform, e.g., darwin-amd64 or linux-amd64
+OS_ARCH=$(echo "$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
+# Using crpto vs CA. default is cryptogen
+CRYPTO="cryptogen"
+# timeout duration - the duration the CLI should wait for a response from
+# another container before giving up
+MAX_RETRY=5
+# default for delay between commands
+CLI_DELAY=3
+# channel name defaults to "mychannel"
+CHANNEL_NAME="mychannel"
+# chaincode name defaults to "basic"
+CC_NAME="basic"
+# chaincode path defaults to "NA"
+CC_SRC_PATH="NA"
+# endorsement policy defaults to "NA". This would allow chaincodes to use the majority default policy.
+CC_END_POLICY="NA"
+# collection configuration defaults to "NA"
+CC_COLL_CONFIG="NA"
+# chaincode init function defaults to "NA"
+CC_INIT_FCN="NA"
+# use this as the default docker-compose yaml definition
+COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
+# docker-compose.yaml file if you are using couchdb
+COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
+# certificate authorities compose file
+COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
+# use this as the docker compose couch file for org3
+COMPOSE_FILE_COUCH_ORG3=addOrg3/docker/docker-compose-couch-org3.yaml
+# use this as the default docker-compose yaml definition for org3
+COMPOSE_FILE_ORG3=addOrg3/docker/docker-compose-org3.yaml
+#
+# use go as the default language for chaincode
+CC_SRC_LANGUAGE="go"
+# Chaincode version
+CC_VERSION="1.0"
+# Chaincode definition sequence
+CC_SEQUENCE=1
+# default image tag
+IMAGETAG="latest"
+# default ca image tag
+CA_IMAGETAG="latest"
+# default database
+DATABASE="leveldb"
+
+# Parse commandline args
+
+## Parse mode
+if [[ $# -lt 1 ]] ; then
+  printHelp
+  exit 0
+else
+  MODE=$1
+  shift
+fi
+
+# parse a createChannel subcommand if used
+if [[ $# -ge 1 ]] ; then
+  key="$1"
+  if [[ "$key" == "createChannel" ]]; then
+      export MODE="createChannel"
+      shift
+  fi
+fi
+
+# parse flags
+
+while [[ $# -ge 1 ]] ; do
+  key="$1"
+  case $key in
+  -h )
+    printHelp $MODE
+    exit 0
+    ;;
+  -c )
+    CHANNEL_NAME="$2"
+    shift
+    ;;
+  -ca )
+    CRYPTO="Certificate Authorities"
+    ;;
+  -r )
+    MAX_RETRY="$2"
+    shift
+    ;;
+  -d )
+    CLI_DELAY="$2"
+    shift
+    ;;
+  -s )
+    DATABASE="$2"
+    shift
+    ;;
+  -ccl )
+    CC_SRC_LANGUAGE="$2"
+    shift
+    ;;
+  -ccn )
+    CC_NAME="$2"
+    shift
+    ;;
+  -ccv )
+    CC_VERSION="$2"
+    shift
+    ;;
+  -ccs )
+    CC_SEQUENCE="$2"
+    shift
+    ;;
+  -ccp )
+    CC_SRC_PATH="$2"
+    shift
+    ;;
+  -ccep )
+    CC_END_POLICY="$2"
+    shift
+    ;;
+  -cccg )
+    CC_COLL_CONFIG="$2"
+    shift
+    ;;
+  -cci )
+    CC_INIT_FCN="$2"
+    shift
+    ;;
+  -i )
+    IMAGETAG="$2"
+    shift
+    ;;
+  -cai )
+    CA_IMAGETAG="$2"
+    shift
+    ;;
+  -verbose )
+    VERBOSE=true
+    shift
+    ;;
+  * )
+    errorln "Unknown flag: $key"
+    printHelp
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+# Are we generating crypto material with this command?
+if [ ! -d "organizations/peerOrganizations" ]; then
+  CRYPTO_MODE="with crypto from '${CRYPTO}'"
+else
+  CRYPTO_MODE=""
+fi
+
+# Determine mode of operation and printing out what we asked for
+if [ "$MODE" == "up" ]; then
+  infoln "Starting nodes with CLI timeout of '${MAX_RETRY}' tries and CLI delay of '${CLI_DELAY}' seconds and using database '${DATABASE}' ${CRYPTO_MODE}"
+elif [ "$MODE" == "createChannel" ]; then
+  infoln "Creating channel '${CHANNEL_NAME}'."
+  infoln "If network is not up, starting nodes with CLI timeout of '${MAX_RETRY}' tries and CLI delay of '${CLI_DELAY}' seconds and using database '${DATABASE} ${CRYPTO_MODE}"
+elif [ "$MODE" == "down" ]; then
+  infoln "Stopping network"
+elif [ "$MODE" == "restart" ]; then
+  infoln "Restarting network"
+elif [ "$MODE" == "deployCC" ]; then
+  infoln "deploying chaincode on channel '${CHANNEL_NAME}'"
+else
+  printHelp
+  exit 1
+fi
+
+if [ "${MODE}" == "up" ]; then
+  networkUp
+elif [ "${MODE}" == "createChannel" ]; then
+  createChannel
+elif [ "${MODE}" == "deployCC" ]; then
+  deployCC
+elif [ "${MODE}" == "down" ]; then
+  networkDown
+else
+  printHelp
+  exit 1
+fi
