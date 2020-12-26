@@ -144,7 +144,7 @@ infoln "Updating anchor peers for org2..."
 updateAnchorPeers 2
 infoln "Updating anchor peers for org3..."
 updateAnchorPeers 3
-infoln "Updating anchor peers for org3..."
+infoln "Updating anchor peers for org4..."
 updateAnchorPeers 4
 
 successln "Channel successfully joined"

@@ -2,7 +2,7 @@
     "name": "test-network-${ORG}",
     "version": "1.0.0",
     "client": {
-        "organization": "Org${ORG}",
+        "organization": "${ORG}",
         "connection": {
             "timeout": {
                 "peer": {
@@ -12,7 +12,7 @@
         }
     },
     "organizations": {
-        "Org${ORG}": {
+        "${ORG}": {
             "mspid": "${ORG}MSP",
             "peers": [
                 "peer0.${ORG}.example.com"

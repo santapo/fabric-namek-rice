@@ -8,7 +8,7 @@ client:
       peer:
         endorser: '300'
 organizations:
-  Org${ORG}:
+  ${ORG}:
     mspid: ${ORG}MSP
     peers:
     - peer0.${ORG}.example.com
