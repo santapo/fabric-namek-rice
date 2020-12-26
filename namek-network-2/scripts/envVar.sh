@@ -32,24 +32,24 @@ setGlobals() {
     USING_ORG="${OVERRIDE_ORG}"
   fi
   infoln "Using organization ${USING_ORG}"
-  if [ $USING_ORG -eq 1 ]; then
+  if [ $USING_ORG == "producer" ]; then
     export CORE_PEER_LOCALMSPID="ProducerMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_PRODUCER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/producer.example.com/users/Admin@producer.example.com/msp
     export CORE_PEER_ADDRESS=localhost:7051
-  elif [ $USING_ORG -eq 2 ]; then
+  elif [ $USING_ORG == "manufacturer" ]; then
     export CORE_PEER_LOCALMSPID="ManufacturerMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_MANUFACTURER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/manufacturer.example.com/users/Admin@manufacturer.example.com/msp
     export CORE_PEER_ADDRESS=localhost:9051
 
-  elif [ $USING_ORG -eq 3 ]; then
+  elif [ $USING_ORG == "deliverer" ]; then
     export CORE_PEER_LOCALMSPID="DelivererMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_DELIVERER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/deliverer.example.com/users/Admin@deliverer.example.com/msp
     export CORE_PEER_ADDRESS=localhost:11051
 
-  elif [ $USING_ORG -eq 4 ]; then
+  elif [ $USING_ORG == "retailer" ]; then
     export CORE_PEER_LOCALMSPID="RetailerMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_RETAILER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/retailer.example.com/users/Admin@retailer.example.com/msp

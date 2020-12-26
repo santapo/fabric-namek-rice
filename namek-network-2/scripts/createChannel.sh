@@ -46,7 +46,7 @@ createAnchorPeerTx() {
 }
 
 createChannel() {
-	setGlobals 1
+	setGlobals producer
 	# Poll in case the raft leader is not set yet
 	local rc=1
 	local COUNTER=1
@@ -81,7 +81,7 @@ joinChannel() {
 		COUNTER=$(expr $COUNTER + 1)
 	done
 	cat log.txt
-	verifyResult $res "After $MAX_RETRY attempts, peer0.org${ORG} has failed to join channel '$CHANNEL_NAME' "
+	verifyResult $res "After $MAX_RETRY attempts, peer0.${ORG} has failed to join channel '$CHANNEL_NAME' "
 }
 
 updateAnchorPeers() {
@@ -128,24 +128,24 @@ infoln "Creating channel ${CHANNEL_NAME}"
 createChannel
 
 ## Join all the peers to the channel
-infoln "Join Org1 peers to the channel..."
-joinChannel 1
-infoln "Join Org2 peers to the channel..."
-joinChannel 2
-infoln "Join Org3 peers to the channel..."
-joinChannel 3
-infoln "Join Org4 peers to the channel..."
-joinChannel 4
+infoln "Join Producer peers to the channel..."
+joinChannel producer
+infoln "Join Manufacturer peers to the channel..."
+joinChannel manufacturer
+infoln "Join Deliverer peers to the channel..."
+joinChannel deliverer
+infoln "Join Retailer peers to the channel..."
+joinChannel retailer
 
 ## Set the anchor peers for each org in the channel
-infoln "Updating anchor peers for org1..."
-updateAnchorPeers 1
-infoln "Updating anchor peers for org2..."
-updateAnchorPeers 2
-infoln "Updating anchor peers for org3..."
-updateAnchorPeers 3
-infoln "Updating anchor peers for org4..."
-updateAnchorPeers 4
+infoln "Updating anchor peers for producer..."
+updateAnchorPeers producer
+infoln "Updating anchor peers for manufacturer..."
+updateAnchorPeers manufacturer
+infoln "Updating anchor peers for deliverer..."
+updateAnchorPeers deliverer
+infoln "Updating anchor peers for retailer..."
+updateAnchorPeers retailer
 
 successln "Channel successfully joined"
 

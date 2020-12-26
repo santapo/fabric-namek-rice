@@ -189,7 +189,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.retailer.example.com:13051
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.example.com:13051
-      - CORE_PEER_LOCALMSPID=DelivererMSP
+      - CORE_PEER_LOCALMSPID=RetailerMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../organizations/peerOrganizations/retailer.example.com/peers/peer0.retailer.example.com/msp:/etc/hyperledger/fabric/msp
