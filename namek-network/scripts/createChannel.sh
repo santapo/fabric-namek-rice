@@ -6,7 +6,7 @@ CHANNEL_NAME="$1"
 DELAY="$2"
 MAX_RETRY="$3"
 VERBOSE="$4"
-: ${CHANNEL_NAME:="mychannel"}
+: ${CHANNEL_NAME:="foodchain"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 : ${VERBOSE:="false"}
@@ -32,7 +32,7 @@ createChannelTx() {
 
 createAncorPeerTx() {
 
-	for orgmsp in ProducerMSP Manufacturer2MSP DelivererMSP RetailerMSP; do
+	for orgmsp in ProducerMSP ManufacturerMSP DelivererMSP RetailerMSP; do
 
 	infoln "Generating anchor peer update transaction for ${orgmsp}"
 	set -x
@@ -46,7 +46,7 @@ createAncorPeerTx() {
 }
 
 createChannel() {
-	setGlobals 1
+	setGlobals producer
 	# Poll in case the raft leader is not set yet
 	local rc=1
 	local COUNTER=1
