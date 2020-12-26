@@ -1,0 +1,14 @@
+namek-network/channel-artifacts/*.tx
+namek-network/channel-artifacts/*.block
+namek-network/ledgers
+namek-network/ledgers-backup
+namek-network/channel-artifacts/*.json
+namek-network/org3-artifacts/crypto-config/*
+namek-network/organizations/fabric-ca/ordererOrg/*
+namek-network/organizations/fabric-ca/org1/*
+namek-network/organizations/fabric-ca/org2/*
+namek-network/organizations/ordererOrganizations/*
+namek-network/organizations/peerOrganizations/*
+namek-network/system-genesis-block/*
+namek-network/*.tar.gz
+namek-network/log.txt
