@@ -10,6 +10,7 @@ volumes:
   peer0.producer.example.com:
   peer0.manufacturer.example.com:
   peer0.deliverer.example.com:
+  peer0.retailer.example.com:
 
 networks:
   test:
@@ -160,5 +161,43 @@ services:
     command: peer node start
     ports:
       - 11051:11051
+    networks:
+      - test
+
+  peer0.retailer.example.com:
+    container_name: peer0.retailer.example.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      #Generic peer variables
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.retailer.example.com
+      - CORE_PEER_ADDRESS=peer0.retailer.example.com:13051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:13051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.retailer.example.com:13052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.retailer.example.com:13051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.example.com:13051
+      - CORE_PEER_LOCALMSPID=DelivererMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/retailer.example.com/peers/peer0.retailer.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/retailer.example.com/peers/peer0.retailer.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.retailer.example.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 13051:13051
     networks:
       - test

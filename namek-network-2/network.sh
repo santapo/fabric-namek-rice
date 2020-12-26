@@ -174,6 +174,16 @@ function createOrgs() {
       fatalln "Failed to generate certificates..."
     fi
 
+    infoln "Create Org4 Identities"
+
+    set -x
+    cryptogen generate --config=./organizations/cryptogen/crypto-config-retailer.yaml --output="organizations"
+    res=$?
+    { set +x; } 2>/dev/null
+    if [ $res -ne 0 ]; then
+      fatalln "Failed to generate certificates..."
+    fi
+
     infoln "Create Orderer Org Identities"
 
     set -x
@@ -216,13 +226,17 @@ function createOrgs() {
 
     createOrg3
 
+    infoln "Create Org4 Identities"
+
+    createOrg4
+
     infoln "Create Orderer Org Identities"
 
     createOrderer
 
   fi
 
-  infoln "Generate CCP files for Org1 and Org2 Org3"
+  infoln "Generate CCP files for Org1 and Org2 and Org3 and Org4"
   ./organizations/ccp-generate.sh
 }
 

@@ -148,6 +148,42 @@ Organizations:
             - Host: peer0.deliverer.example.com
               Port: 11051
 
+    - &Retailer
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: RetailerMSP
+
+        # ID to load the MSP definition as
+        ID: RetailerMSP
+
+        MSPDir: ../organizations/peerOrganizations/retailer.example.com/msp
+
+        # Policies defines the set of policies at this level of the config tree
+        # For organization policies, their canonical path is usually
+        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.peer', 'RetailerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('RetailerMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('RetailerMSP.peer')"
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.retailer.example.com
+              Port: 13051
+
+
+
 
 
 ################################################################################
@@ -367,6 +403,7 @@ Profiles:
                     - *Producer
                     - *Manufacturer
                     - *Deliverer
+                    - *Retailer
     TwoOrgsChannel:
         Consortium: SampleConsortium
         <<: *ChannelDefaults
@@ -376,5 +413,6 @@ Profiles:
                 - *Producer
                 - *Manufacturer
                 - *Deliverer
+                - *Retailer
             Capabilities:
                 <<: *ApplicationCapabilities

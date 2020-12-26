@@ -13,6 +13,7 @@ export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers
 export PEER0_PRODUCER_CA=${PWD}/organizations/peerOrganizations/producer.example.com/peers/peer0.producer.example.com/tls/ca.crt
 export PEER0_MANUFACTURER_CA=${PWD}/organizations/peerOrganizations/manufacturer.example.com/peers/peer0.manufacturer.example.com/tls/ca.crt
 export PEER0_DELIVERER_CA=${PWD}/organizations/peerOrganizations/deliverer.example.com/peers/peer0.deliverer.example.com/tls/ca.crt
+export PEER0_DELIVERER_CA=${PWD}/organizations/peerOrganizations/retailer.example.com/peers/peer0.retailer.example.com/tls/ca.crt
 export PEER0_ORG3_CA=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
 
 # Set OrdererOrg.Admin globals
@@ -47,6 +48,12 @@ setGlobals() {
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_DELIVERER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/deliverer.example.com/users/Admin@deliverer.example.com/msp
     export CORE_PEER_ADDRESS=localhost:11051
+
+  elif [ $USING_ORG -eq 4 ]; then
+    export CORE_PEER_LOCALMSPID="RetailerMSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_RETAILER_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/retailer.example.com/users/Admin@retailer.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:13051
   else
     errorln "ORG Unknown"
   fi
